@@ -7,11 +7,17 @@ const _PLAYER_SCENE = preload("res://Scenes/Player/Player.tscn")
 const _HUD_SCENE = preload("res://Scenes/UI/GameHUD.tscn")
 const _INTERACTABLE_SCRIPT = preload("res://Scripts/World/CityInteractable.gd")
 const _VEHICLE_SCRIPT = preload("res://Scripts/World/Vehicle.gd")
+const _CITIZEN_SCRIPT = preload("res://Scripts/World/Citizen.gd")
+const _TRAFFIC_SCRIPT = preload("res://Scripts/World/TrafficCar.gd")
+
+const MAX_ACTIVE_CITIZENS := 15
 
 func _ready() -> void:
 	_spawn_player()
 	_spawn_hud()
 	_spawn_city_interactions()
+	_spawn_citizens()
+	_spawn_traffic()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
@@ -40,6 +46,63 @@ func _spawn_city_interactions() -> void:
 	_add_shop(Vector2(618, 550), "Downtown Mods")
 	_add_npc(Vector2(925, 352), "Lamar", "Mission contact: delivery route placeholder unlocked.", 50)
 	_add_npc(Vector2(1288, 610), "Maya", "Street race placeholder added to your phone.", 35)
+
+func _spawn_citizens() -> void:
+	var sidewalk_points = _get_sidewalk_points()
+	var names = ["Alex", "Mina", "Jay", "Rosa", "Omar", "Lena", "Vic", "Nia", "Sam", "Ivy", "Leo", "Tara"]
+	var count = min(MAX_ACTIVE_CITIZENS, names.size())
+	for i in range(count):
+		var citizen = KinematicBody2D.new()
+		citizen.name = "Citizen%s" % names[i]
+		citizen.set_script(_CITIZEN_SCRIPT)
+		$Entities.add_child(citizen)
+		citizen.setup(names[i], sidewalk_points, 1000 + i * 17)
+		_add_citizen_visual(citizen, i)
+
+func _spawn_traffic() -> void:
+	var routes = _get_traffic_routes()
+	var colors = [Color(0.95, 0.68, 0.08), Color(0.1, 0.42, 0.95), Color(0.9, 0.12, 0.12), Color(0.08, 0.62, 0.24), Color(0.85, 0.85, 0.82), Color(0.55, 0.22, 0.8)]
+	for i in range(routes.size()):
+		var traffic = KinematicBody2D.new()
+		traffic.name = "TrafficCar%d" % i
+		traffic.set_script(_TRAFFIC_SCRIPT)
+		$Entities.add_child(traffic)
+		traffic.setup(routes[i], colors[i % colors.size()])
+
+func _get_sidewalk_points() -> Array:
+	return [
+		Vector2(278, 210), Vector2(442, 210), Vector2(738, 220), Vector2(902, 220), Vector2(1158, 220), Vector2(1322, 220),
+		Vector2(278, 390), Vector2(442, 390), Vector2(738, 390), Vector2(902, 390), Vector2(1158, 390), Vector2(1322, 390),
+		Vector2(278, 572), Vector2(442, 572), Vector2(738, 572), Vector2(902, 572), Vector2(1158, 572), Vector2(1322, 572),
+		Vector2(278, 742), Vector2(442, 742), Vector2(738, 742), Vector2(902, 742), Vector2(1158, 742), Vector2(1322, 742)
+	]
+
+func _get_traffic_routes() -> Array:
+	return [
+		[Vector2(80, 274), Vector2(1520, 274)],
+		[Vector2(1520, 326), Vector2(80, 326)],
+		[Vector2(80, 624), Vector2(1520, 624)],
+		[Vector2(1520, 676), Vector2(80, 676)],
+		[Vector2(334, 930), Vector2(334, 80)],
+		[Vector2(386, 80), Vector2(386, 930)]
+	]
+
+func _add_citizen_visual(citizen: Node2D, index: int) -> void:
+	var colors = [Color(0.95, 0.72, 0.22), Color(0.22, 0.56, 0.95), Color(0.85, 0.28, 0.42), Color(0.18, 0.70, 0.38)]
+	var shape = CollisionShape2D.new()
+	var capsule = CapsuleShape2D.new()
+	capsule.radius = 7
+	capsule.height = 18
+	shape.shape = capsule
+	citizen.add_child(shape)
+	var body = Polygon2D.new()
+	body.color = colors[index % colors.size()]
+	body.polygon = PoolVector2Array([Vector2(-7, -15), Vector2(7, -15), Vector2(8, 10), Vector2(-8, 10)])
+	citizen.add_child(body)
+	var head = Polygon2D.new()
+	head.color = GamePalette.PLAYER_SKIN
+	head.polygon = PoolVector2Array([Vector2(-6, -26), Vector2(6, -26), Vector2(7, -15), Vector2(-7, -15)])
+	citizen.add_child(head)
 
 func _add_vehicle(pos: Vector2, title: String, color: Color, angle: float) -> void:
 	var car = KinematicBody2D.new()

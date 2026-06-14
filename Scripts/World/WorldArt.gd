@@ -15,6 +15,9 @@ func _ready() -> void:
 	_build_roads()
 	_build_city_blocks()
 	_build_parking_lots()
+	_build_park_area()
+	_build_bus_stops()
+	_build_traffic_signals()
 	_build_trees()
 	_build_lamp_posts()
 	_create_building_collision()
@@ -88,6 +91,30 @@ func _build_parking_lots() -> void:
 		for x in range(int(lot.position.x + 18), int(lot.position.x + lot.size.x - 18), 42):
 			_add_rect(Rect2(x, lot.position.y + 8, 3, lot.size.y - 16), Color(0.88, 0.88, 0.82))
 		_add_label("P", lot.position + Vector2(12, 8), 20, Color.white)
+
+func _build_park_area() -> void:
+	var park = Rect2(1215, 805, 250, 145)
+	_add_rect(park, Color(0.16, 0.64, 0.24))
+	_add_rect(Rect2(park.position.x + 18, park.position.y + 62, park.size.x - 36, 16), Color(0.78, 0.68, 0.48))
+	_add_label("CITY PARK", park.position + Vector2(78, 14), 18, Color.white)
+	for x in [1248, 1328, 1410]:
+		_add_rect(Rect2(x - 14, park.position.y + 104, 28, 8), Color(0.42, 0.24, 0.12))
+		_add_rect(Rect2(x - 3, park.position.y + 88, 6, 24), Color(0.18, 0.18, 0.16))
+
+func _build_bus_stops() -> void:
+	for pos in [Vector2(485, 236), Vector2(1110, 686)]:
+		_add_rect(Rect2(pos.x - 34, pos.y - 8, 68, 16), Color(0.10, 0.32, 0.72))
+		_add_rect(Rect2(pos.x - 30, pos.y - 34, 60, 26), Color(0.58, 0.84, 1.0, 0.72))
+		_add_rect(Rect2(pos.x - 38, pos.y - 38, 76, 6), Color(0.08, 0.16, 0.24))
+		_add_label("BUS", pos + Vector2(-18, -31), 10, Color.white)
+
+func _build_traffic_signals() -> void:
+	for pos in [Vector2(292, 222), Vector2(428, 378), Vector2(752, 572), Vector2(888, 728), Vector2(1172, 222), Vector2(1308, 572)]:
+		_add_rect(Rect2(pos.x - 3, pos.y - 28, 6, 34), GamePalette.LAMP_POST)
+		_add_rect(Rect2(pos.x - 8, pos.y - 46, 16, 24), Color(0.06, 0.07, 0.08))
+		_add_circle(pos + Vector2(0, -39), 3.2, Color(0.95, 0.08, 0.06))
+		_add_circle(pos + Vector2(0, -32), 3.2, Color(0.95, 0.78, 0.08))
+		_add_circle(pos + Vector2(0, -25), 3.2, Color(0.04, 0.82, 0.18))
 
 func _build_trees() -> void:
 	var positions = [Vector2(35, 370), Vector2(275, 375), Vector2(465, 300), Vector2(715, 305), Vector2(900, 330), Vector2(1185, 335), Vector2(1295, 310), Vector2(1530, 330), Vector2(410, 725), Vector2(790, 735), Vector2(1220, 725), Vector2(1540, 720)]

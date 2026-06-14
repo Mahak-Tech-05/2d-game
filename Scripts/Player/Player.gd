@@ -125,6 +125,12 @@ func add_money(amount: int) -> void:
 	GameEvents.raise_money_changed(money)
 	_sync_stats_to_save_data()
 
+
+func add_money(amount: int) -> void:
+	money = max(0, money + amount)
+	GameEvents.raise_money_changed(money)
+	_sync_stats_to_save_data()
+
 func _setup_camera() -> void:
 	if camera == null:
 		return
