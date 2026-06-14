@@ -1,6 +1,7 @@
 extends Node2D
 
 # Open-world city scene: player, HUD, drivable cars, stores, NPC contacts, and interaction placeholders.
+# Open-world city scene: player, HUD, traffic props, stores, NPC contacts, and interaction placeholders.
 
 const _PLAYER_SCENE = preload("res://Scenes/Player/Player.tscn")
 const _HUD_SCENE = preload("res://Scenes/UI/GameHUD.tscn")
@@ -39,6 +40,8 @@ func _spawn_hud() -> void:
 func _spawn_city_interactions() -> void:
 	_add_vehicle(Vector2(155, 650), "Blista Compact", GamePalette.VEHICLE_RED, 0.0)
 	_add_vehicle(Vector2(1020, 650), "Prairie Cruiser", GamePalette.VEHICLE_BLUE, PI)
+	_add_vehicle(Vector2(155, 650), "Blista Compact", GamePalette.VEHICLE_RED)
+	_add_vehicle(Vector2(1020, 650), "Prairie Cruiser", GamePalette.VEHICLE_BLUE)
 	_add_shop(Vector2(180, 260), "Vespucci 24/7")
 	_add_shop(Vector2(618, 550), "Downtown Mods")
 	_add_npc(Vector2(925, 352), "Lamar", "Mission contact: delivery route placeholder unlocked.", 50)
@@ -123,6 +126,15 @@ func _add_vehicle(pos: Vector2, title: String, color: Color, angle: float) -> vo
 	_add_child_rect(car, Rect2(-16, -12, 30, 11), GamePalette.VEHICLE_GLASS)
 	_add_child_rect(car, Rect2(-25, 15, 12, 5), Color(0.05, 0.05, 0.05))
 	_add_child_rect(car, Rect2(12, 15, 12, 5), Color(0.05, 0.05, 0.05))
+func _add_vehicle(pos: Vector2, title: String, color: Color) -> void:
+	var root = _make_interactable(pos, "vehicle", title, "Press E to enter")
+	var car = Polygon2D.new()
+	car.color = color
+	car.polygon = PoolVector2Array([Vector2(-30, -15), Vector2(30, -15), Vector2(36, 0), Vector2(28, 17), Vector2(-28, 17), Vector2(-36, 0)])
+	root.add_child(car)
+	_add_child_rect(root, Rect2(-16, -11, 32, 10), GamePalette.VEHICLE_GLASS)
+	_add_child_rect(root, Rect2(-24, 14, 12, 5), Color(0.05, 0.05, 0.05))
+	_add_child_rect(root, Rect2(12, 14, 12, 5), Color(0.05, 0.05, 0.05))
 
 func _add_shop(pos: Vector2, title: String) -> void:
 	var root = _make_interactable(pos, "shop", title, "Press E to shop")

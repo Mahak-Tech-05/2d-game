@@ -60,6 +60,9 @@ func _physics_process(delta: float) -> void:
 		return
 	var input_vector = _get_input_velocity()
 	var desired_velocity = input_vector * walk_speed
+	var input_vector = _get_input_velocity()
+	var target_speed = drive_speed if in_vehicle else walk_speed
+	var desired_velocity = input_vector * target_speed
 	var rate = acceleration if input_vector.length_squared() > 0.01 else deceleration
 	velocity = _move_vector_toward(velocity, desired_velocity, rate * delta)
 	velocity = move_and_slide(velocity)
@@ -122,6 +125,12 @@ func add_money(amount: int) -> void:
 	GameEvents.raise_money_changed(money)
 	_sync_stats_to_save_data()
 
+
+func add_money(amount: int) -> void:
+	money = max(0, money + amount)
+	GameEvents.raise_money_changed(money)
+	_sync_stats_to_save_data()
+
 func _setup_camera() -> void:
 	if camera == null:
 		return
@@ -162,6 +171,13 @@ func _handle_actions() -> void:
 
 func _try_interact() -> void:
 	var nearest = _find_nearest_interactable()
+	var nearest = null
+	var best_dist := 72.0
+	for item in get_tree().get_nodes_in_group("city_interactable"):
+		var dist = global_position.distance_to(item.global_position)
+		if dist < best_dist:
+			best_dist = dist
+			nearest = item
 	if nearest == null or not nearest.has_method("interact"):
 		GameEvents.raise_mission_text_changed("No interaction nearby. Walk to a car, store, or citizen and press E.")
 		return
@@ -233,6 +249,23 @@ func _update_attached_vehicle_state() -> void:
 		return
 	global_position = current_vehicle.global_position
 	facing = Vector2.RIGHT.rotated(current_vehicle.rotation)
+	if str(result.get("type", "")) == "vehicle":
+		_enter_vehicle(str(result.get("title", "Vehicle")))
+
+func _enter_vehicle(name: String) -> void:
+	in_vehicle = true
+	vehicle_name = name
+	walk_speed = 260.0
+	_visual.scale = Vector2(1.25, 1.05)
+	GameEvents.raise_vehicle_status_changed("Driving: %s" % vehicle_name)
+
+func _exit_vehicle() -> void:
+	in_vehicle = false
+	vehicle_name = "On Foot"
+	walk_speed = 210.0
+	_visual.scale = Vector2.ONE
+	GameEvents.raise_vehicle_status_changed(vehicle_name)
+	GameEvents.raise_mission_text_changed("Exited vehicle. Visit a store or talk to a citizen for missions.")
 
 func _update_visuals(delta: float) -> void:
 	if _weapon_pivot != null and facing.length_squared() > 0.01:
