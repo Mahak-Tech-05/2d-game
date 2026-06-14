@@ -25,29 +25,29 @@ color = Color( 0, 0, 0, 0.35 )
 polygon = PoolVector2Array( -14, 10, 14, 10, 10, 16, -10, 16 )
 
 [node name="Cape" type="Polygon2D" parent="Visual"]
-color = Color( 0.28, 0.14, 0.24, 1 )
+color = Color( 0.95, 0.95, 0.92, 1 )
 polygon = PoolVector2Array( -9, -4, 9, -4, 6, 14, -6, 14 )
 
 [node name="Body" type="Polygon2D" parent="Visual"]
-color = Color( 0.52, 0.28, 0.32, 1 )
+color = Color( 0.12, 0.30, 0.88, 1 )
 polygon = PoolVector2Array( -11, -18, 11, -18, 13, 12, -13, 12 )
 
 [node name="Belt" type="Polygon2D" parent="Visual"]
-color = Color( 0.82, 0.68, 0.38, 1 )
+color = Color( 0.95, 0.76, 0.20, 1 )
 polygon = PoolVector2Array( -12, 2, 12, 2, 11, 7, -11, 7 )
 
 [node name="Head" type="Polygon2D" parent="Visual"]
-color = Color( 0.62, 0.42, 0.4, 1 )
+color = Color( 0.78, 0.50, 0.32, 1 )
 polygon = PoolVector2Array( -7, -26, 7, -26, 8, -16, -8, -16 )
 
 [node name="Helm" type="Polygon2D" parent="Visual"]
-color = Color( 0.38, 0.32, 0.36, 1 )
+color = Color( 0.08, 0.10, 0.12, 1 )
 polygon = PoolVector2Array( -8, -28, 8, -28, 6, -22, -6, -22 )
 
 [node name="WeaponPivot" type="Node2D" parent="Visual"]
 
 [node name="Blade" type="Polygon2D" parent="Visual/WeaponPivot"]
-color = Color( 0.78, 0.8, 0.88, 1 )
+color = Color( 0.25, 0.36, 0.46, 1 )
 polygon = PoolVector2Array( 8, -2, 34, 0, 8, 2, 12, 0 )
 
 [node name="HealthComponent" type="Node" parent="."]
@@ -72,8 +72,10 @@ shape = SubResource( 2 )
 current = true
 limit_left = 0
 limit_top = 0
-limit_right = 1024
-limit_bottom = 576
+limit_right = 1600
+limit_bottom = 1000
+smoothing_enabled = true
+smoothing_speed = 4.5
 drag_margin_h_enabled = true
 drag_margin_v_enabled = true
 drag_margin_left = 0.12

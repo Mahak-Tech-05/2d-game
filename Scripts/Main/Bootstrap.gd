@@ -4,7 +4,7 @@ extends Node
 
 
 func _ready() -> void:
-	print("[Bootstrap] Starting The Last Yodha...")
+	print("[Bootstrap] Starting Sun City Open World...")
 	if not GameManager.is_initialized:
 		GameManager.initialize()
 	SceneManager.go_to_main_menu()
