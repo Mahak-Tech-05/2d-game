@@ -28,6 +28,22 @@ func interact(_player) -> Dictionary:
 
 func enter(player: Node) -> void:
 	driver = player
+export var vehicle_name := "Compact"
+export var drive_speed := 310.0
+export var acceleration := 900.0
+export var brake := 1100.0
+
+var velocity := Vector2.ZERO
+var driver = null
+
+func _ready() -> void:
+	add_to_group("vehicles")
+	collision_layer = GameConstants.LAYER_PLAYER
+	collision_mask = GameConstants.LAYER_WORLD
+
+func enter(player) -> void:
+	driver = player
+	visible = true
 	set_physics_process(true)
 
 func exit() -> void:
@@ -42,6 +58,7 @@ func has_driver() -> bool:
 func get_exit_position() -> Vector2:
 	var side = Vector2.UP.rotated(rotation)
 	return global_position + side * 46.0
+	velocity = Vector2.ZERO
 
 func _physics_process(delta: float) -> void:
 	if driver == null:
@@ -74,3 +91,4 @@ func _move_float_toward(current: float, target: float, max_delta: float) -> floa
 	if abs(target - current) <= max_delta:
 		return target
 	return current + sign(target - current) * max_delta
+	global_position = driver.global_position
