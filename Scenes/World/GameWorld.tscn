@@ -1,0 +1,139 @@
+[gd_scene load_steps=9 format=2]
+
+[ext_resource path="res://Scripts/World/GameWorld.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/World/WorldArt.gd" type="Script" id=2]
+[ext_resource path="res://Scripts/World/DamageZone.gd" type="Script" id=3]
+[ext_resource path="res://Scripts/World/BossArenaTrigger.gd" type="Script" id=4]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 512, 20 )
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 20, 288 )
+
+[sub_resource type="RectangleShape2D" id=3]
+extents = Vector2( 80, 60 )
+
+[sub_resource type="RectangleShape2D" id=4]
+extents = Vector2( 120, 200 )
+
+[node name="GameWorld" type="Node2D"]
+script = ExtResource( 1 )
+
+[node name="WorldArt" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource( 2 )
+
+[node name="Atmosphere" type="ColorRect" parent="."]
+margin_right = 1024.0
+margin_bottom = 576.0
+mouse_filter = 2
+color = Color( 0.28, 0.08, 0.16, 0.08 )
+
+[node name="Entities" type="Node2D" parent="."]
+
+[node name="Walls" type="Node2D" parent="."]
+
+[node name="TopWall" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( 512, -20 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/TopWall"]
+shape = SubResource( 1 )
+
+[node name="BottomWall" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( 512, 596 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/BottomWall"]
+shape = SubResource( 1 )
+
+[node name="LeftWall" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( -20, 288 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/LeftWall"]
+shape = SubResource( 2 )
+
+[node name="RightWall" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( 1044, 288 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/RightWall"]
+shape = SubResource( 2 )
+
+[node name="ObstacleA" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( 320, 360 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/ObstacleA"]
+shape = SubResource( 3 )
+
+[node name="ObstacleVisualA" type="Polygon2D" parent="Walls/ObstacleA"]
+color = Color( 0.2, 0.12, 0.16, 1 )
+polygon = PoolVector2Array( -80, -60, 80, -60, 70, 60, -70, 60 )
+
+[node name="ObstacleB" type="StaticBody2D" parent="Walls"]
+collision_layer = 1
+collision_mask = 0
+position = Vector2( 720, 400 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Walls/ObstacleB"]
+shape = SubResource( 3 )
+
+[node name="ObstacleVisualB" type="Polygon2D" parent="Walls/ObstacleB"]
+color = Color( 0.2, 0.12, 0.16, 1 )
+polygon = PoolVector2Array( -80, -60, 80, -60, 70, 60, -70, 60 )
+
+[node name="CursedZone" type="Area2D" parent="."]
+position = Vector2( 520, 180 )
+script = ExtResource( 3 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="CursedZone"]
+shape = SubResource( 3 )
+
+[node name="ZoneVisual" type="Polygon2D" parent="CursedZone"]
+color = Color( 0.62, 0.14, 0.32, 0.3 )
+polygon = PoolVector2Array( -80, -60, 80, -60, 60, 60, -60, 60 )
+
+[node name="ZoneLabel" type="Label" parent="CursedZone"]
+margin_left = -70.0
+margin_top = -78.0
+margin_right = 70.0
+margin_bottom = -58.0
+custom_colors/font_color = Color( 0.85, 0.45, 0.55, 1 )
+custom_fonts/font_size = 11
+text = "Cursed Ground"
+align = 1
+
+[node name="BossArena" type="Node2D" parent="."]
+position = Vector2( 820, 0 )
+
+[node name="ArenaFrame" type="Polygon2D" parent="BossArena"]
+color = Color( 0.55, 0.15, 0.2, 0.2 )
+polygon = PoolVector2Array( 10, 70, 210, 70, 210, 510, 10, 510 )
+
+[node name="ArenaLabel" type="Label" parent="BossArena"]
+margin_left = 30.0
+margin_top = 82.0
+margin_right = 190.0
+margin_bottom = 102.0
+custom_colors/font_color = Color( 0.9, 0.5, 0.42, 1 )
+custom_fonts/font_size = 13
+text = "Boss Arena — enter to fight"
+align = 1
+
+[node name="BossSpawn" type="Node2D" parent="BossArena"]
+position = Vector2( 100, 300 )
+
+[node name="BossTrigger" type="Area2D" parent="BossArena"]
+position = Vector2( 100, 300 )
+script = ExtResource( 4 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BossArena/BossTrigger"]
+shape = SubResource( 4 )

@@ -1,0 +1,55 @@
+[gd_scene load_steps=7 format=2]
+
+[ext_resource path="res://Scripts/Enemies/FallenGuard.gd" type="Script" id=1]
+[ext_resource path="res://Scripts/Core/HealthComponent.gd" type="Script" id=2]
+[ext_resource path="res://Scripts/Enemies/EnemyAI.gd" type="Script" id=3]
+[ext_resource path="res://Scripts/Enemies/EnemyCombat.gd" type="Script" id=4]
+[ext_resource path="res://Scripts/Core/HitboxArea.gd" type="Script" id=5]
+
+[sub_resource type="RectangleShape2D" id=1]
+extents = Vector2( 16, 22 )
+
+[sub_resource type="RectangleShape2D" id=2]
+extents = Vector2( 22, 14 )
+
+[node name="FallenGuard" type="KinematicBody2D"]
+script = ExtResource( 1 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="Body" type="Polygon2D" parent="Visual"]
+color = Color( 0.48, 0.2, 0.18, 1 )
+polygon = PoolVector2Array( -16, -22, 16, -22, 14, 20, -14, 20 )
+
+[node name="Armor" type="Polygon2D" parent="Visual"]
+color = Color( 0.32, 0.28, 0.34, 1 )
+polygon = PoolVector2Array( -12, -14, 12, -14, 10, 6, -10, 6 )
+
+[node name="Helm" type="Polygon2D" parent="Visual"]
+color = Color( 0.4, 0.36, 0.42, 1 )
+polygon = PoolVector2Array( -10, -28, 10, -28, 8, -18, -8, -18 )
+
+[node name="Weapon" type="Polygon2D" parent="Visual"]
+color = Color( 0.55, 0.5, 0.58, 1 )
+polygon = PoolVector2Array( 14, -4, 28, 0, 14, 4, 18, 0 )
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource( 2 )
+
+[node name="EnemyAI" type="Node" parent="."]
+script = ExtResource( 3 )
+
+[node name="Combat" type="Node" parent="."]
+script = ExtResource( 4 )
+
+[node name="AttackHitbox" type="Area2D" parent="Combat"]
+collision_layer = 16
+collision_mask = 2
+script = ExtResource( 5 )
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Combat/AttackHitbox"]
+position = Vector2( 26, 0 )
+shape = SubResource( 2 )
