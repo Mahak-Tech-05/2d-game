@@ -1,110 +1,139 @@
 extends CanvasLayer
 
-# In-game HUD with styled panel, boss bar, and pause overlay.
+# Clean open-world HUD: health top-left, money top-right, mission bottom-left, vehicle status bottom-right.
 
-var _player: Node = null
 var _health_fill: ColorRect
-var _stamina_fill: ColorRect
-var _boss_fill: ColorRect
 var _health_label: Label
-var _stamina_label: Label
-var _souls_label: Label
-var _boss_label: Label
-var _boss_row: Control
+var _money_label: Label
+var _mission_label: Label
+var _vehicle_label: Label
 var _pause_overlay: ColorRect
-var _bar_width: float = 150.0
-var _boss_bar_width: float = 380.0
-
+var _bar_width := 190.0
 
 func _ready() -> void:
-	_health_fill = $Margin/VBox/HealthRow/Bar/Fill
-	_stamina_fill = $Margin/VBox/StaminaRow/Bar/Fill
-	_health_label = $Margin/VBox/HealthRow/Label
-	_stamina_label = $Margin/VBox/StaminaRow/Label
-	_souls_label = $Margin/SoulsLabel
-	_boss_row = $Margin/BossRow
-	_boss_fill = $Margin/BossRow/Bar/Fill
-	_boss_label = $Margin/BossRow/Label
-	_pause_overlay = $PauseOverlay
-	_boss_row.visible = false
-	_pause_overlay.visible = false
-
+	_clear_legacy_children()
+	_build_hud()
 	GameEvents.connect("player_health_changed", self, "_on_player_health_changed")
-	GameEvents.connect("player_stamina_changed", self, "_on_player_stamina_changed")
-	GameEvents.connect("souls_changed", self, "_on_souls_changed")
-	GameEvents.connect("boss_spawned", self, "_on_boss_spawned")
-	GameEvents.connect("boss_health_changed", self, "_on_boss_health_changed")
-	GameEvents.connect("boss_phase_changed", self, "_on_boss_phase_changed")
-	GameEvents.connect("boss_defeated", self, "_on_boss_defeated")
+	GameEvents.connect("money_changed", self, "_on_money_changed")
+	GameEvents.connect("mission_text_changed", self, "_on_mission_text_changed")
+	GameEvents.connect("vehicle_status_changed", self, "_on_vehicle_status_changed")
 	GameEvents.connect("game_paused", self, "_on_game_paused")
 	GameEvents.connect("game_resumed", self, "_on_game_resumed")
-
 	call_deferred("_bind_player")
 
+func _clear_legacy_children() -> void:
+	for child in get_children():
+		child.queue_free()
+
+func _build_hud() -> void:
+	var health_panel = _panel(Rect2(18, 18, 238, 48))
+	add_child(health_panel)
+	_health_label = _label("HEALTH", Vector2(12, 6), 13, GamePalette.MISSION_TEXT)
+	health_panel.add_child(_health_label)
+	var bg = _rect(Rect2(12, 27, _bar_width, 12), Color(0.12, 0.16, 0.14, 0.72))
+	health_panel.add_child(bg)
+	_health_fill = _rect(Rect2(12, 27, _bar_width, 12), GamePalette.HP_FILL)
+	health_panel.add_child(_health_fill)
+
+	var money_panel = _panel(Rect2(1350, 18, 220, 48))
+	money_panel.anchor_left = 1.0
+	money_panel.anchor_right = 1.0
+	money_panel.margin_left = -238
+	money_panel.margin_right = -18
+	add_child(money_panel)
+	_money_label = _label("$250", Vector2(12, 9), 24, GamePalette.MONEY_GREEN)
+	_money_label.align = Label.ALIGN_RIGHT
+	_money_label.rect_size = Vector2(196, 30)
+	money_panel.add_child(_money_label)
+
+	var mission_panel = _panel(Rect2(18, 500, 455, 58))
+	mission_panel.anchor_top = 1.0
+	mission_panel.anchor_bottom = 1.0
+	mission_panel.margin_top = -76
+	mission_panel.margin_bottom = -18
+	add_child(mission_panel)
+	_mission_label = _label("Explore Sun City. Press E near cars, shops, and citizens.", Vector2(14, 10), 14, GamePalette.MISSION_TEXT)
+	_mission_label.rect_size = Vector2(425, 40)
+	_mission_label.autowrap = true
+	mission_panel.add_child(_mission_label)
+
+	var vehicle_panel = _panel(Rect2(1250, 510, 332, 48))
+	vehicle_panel.anchor_left = 1.0
+	vehicle_panel.anchor_right = 1.0
+	vehicle_panel.anchor_top = 1.0
+	vehicle_panel.anchor_bottom = 1.0
+	vehicle_panel.margin_left = -350
+	vehicle_panel.margin_right = -18
+	vehicle_panel.margin_top = -66
+	vehicle_panel.margin_bottom = -18
+	add_child(vehicle_panel)
+	_vehicle_label = _label("On Foot", Vector2(12, 10), 16, GamePalette.MISSION_TEXT)
+	_vehicle_label.align = Label.ALIGN_RIGHT
+	_vehicle_label.rect_size = Vector2(304, 24)
+	vehicle_panel.add_child(_vehicle_label)
+
+	_pause_overlay = ColorRect.new()
+	_pause_overlay.anchor_right = 1.0
+	_pause_overlay.anchor_bottom = 1.0
+	_pause_overlay.color = Color(0.78, 0.88, 1.0, 0.28)
+	_pause_overlay.visible = false
+	add_child(_pause_overlay)
+	var pause_label = _label("PAUSED", Vector2(-120, -36), 30, Color(0.05, 0.11, 0.16))
+	pause_label.anchor_left = 0.5
+	pause_label.anchor_top = 0.5
+	pause_label.anchor_right = 0.5
+	pause_label.anchor_bottom = 0.5
+	pause_label.align = Label.ALIGN_CENTER
+	_pause_overlay.add_child(pause_label)
 
 func _bind_player() -> void:
 	var players = get_tree().get_nodes_in_group(GameConstants.GROUP_PLAYER)
 	if players.empty():
 		return
-
-	_player = players[0]
-	if _player.has_node("HealthComponent"):
-		var hp = _player.get_node("HealthComponent")
+	var player = players[0]
+	if player.has_node("HealthComponent"):
+		var hp = player.get_node("HealthComponent")
 		_on_player_health_changed(hp.current_health, hp.max_health)
-	if _player.has_node("StaminaComponent"):
-		var sp = _player.get_node("StaminaComponent")
-		_on_player_stamina_changed(sp.current_stamina, sp.max_stamina)
-
-	var souls = 0
-	if SaveManager.current_save_data.has("player_stats"):
-		souls = int(SaveManager.current_save_data["player_stats"].get("souls", 0))
-	_on_souls_changed(souls)
-
+	if player.get("money") != null:
+		_on_money_changed(int(player.get("money")))
 
 func _on_player_health_changed(current: float, maximum: float) -> void:
-	_set_bar(_health_fill, _bar_width, current, maximum)
-	_health_label.text = "Vitality %d/%d" % [int(ceil(current)), int(maximum)]
+	var ratio = 0.0 if maximum <= 0.0 else clamp(current / maximum, 0.0, 1.0)
+	_health_fill.rect_size.x = _bar_width * ratio
+	_health_label.text = "HEALTH  %d/%d" % [int(ceil(current)), int(maximum)]
 
+func _on_money_changed(total: int) -> void:
+	_money_label.text = "$%06d" % total
 
-func _on_player_stamina_changed(current: float, maximum: float) -> void:
-	_set_bar(_stamina_fill, _bar_width, current, maximum)
-	_stamina_label.text = "Spirit %d/%d" % [int(ceil(current)), int(maximum)]
+func _on_mission_text_changed(text: String) -> void:
+	_mission_label.text = text
 
-
-func _on_souls_changed(total: int) -> void:
-	_souls_label.text = "Souls: %d" % total
-
-
-func _on_boss_spawned(boss) -> void:
-	_boss_row.visible = true
-	if boss != null and "boss_name" in boss:
-		_boss_label.text = str(boss.boss_name)
-
-
-func _on_boss_health_changed(_boss, current: float, maximum: float, boss_name: String) -> void:
-	_boss_row.visible = true
-	_boss_label.text = boss_name
-	_set_bar(_boss_fill, _boss_bar_width, current, maximum)
-
-
-func _on_boss_phase_changed(_boss, _phase_index: int, phase_name: String) -> void:
-	var base_name = _boss_label.text.split(" — ")[0]
-	_boss_label.text = "%s — %s" % [base_name, phase_name]
-
-
-func _on_boss_defeated(_boss) -> void:
-	yield(get_tree().create_timer(2.0), "timeout")
-	_boss_row.visible = false
-
+func _on_vehicle_status_changed(text: String) -> void:
+	_vehicle_label.text = text
 
 func _on_game_paused() -> void:
 	_pause_overlay.visible = true
 
-
 func _on_game_resumed() -> void:
 	_pause_overlay.visible = false
 
+func _panel(rect: Rect2) -> ColorRect:
+	var panel = ColorRect.new()
+	panel.rect_position = rect.position
+	panel.rect_size = rect.size
+	panel.color = GamePalette.HUD_PANEL
+	return panel
 
-func _set_bar(fill: ColorRect, width: float, current: float, maximum: float) -> void:
-	var ratio = 0.0 if maximum <= 0.0 else clamp(current / maximum, 0.0, 1.0)
-	fill.rect_size.x = width * ratio
+func _rect(rect: Rect2, color: Color) -> ColorRect:
+	var node = ColorRect.new()
+	node.rect_position = rect.position
+	node.rect_size = rect.size
+	node.color = color
+	return node
+
+func _label(text: String, pos: Vector2, _size: int, color: Color) -> Label:
+	var label = Label.new()
+	label.text = text
+	label.rect_position = pos
+	label.add_color_override("font_color", color)
+	return label

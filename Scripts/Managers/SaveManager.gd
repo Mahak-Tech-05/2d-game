@@ -167,7 +167,7 @@ func _create_default_save(slot_index: int) -> Dictionary:
 		"timestamp_utc": _utc_timestamp(),
 		"playtime_seconds": 0.0,
 		"current_scene": GameConstants.SCENE_GAME_WORLD,
-		"player_name": "Yodha",
+		"player_name": "Driver",
 		"player_position": {"x": 512.0, "y": 288.0},
 		"player_stats": {
 			"level": 1,
@@ -176,7 +176,7 @@ func _create_default_save(slot_index: int) -> Dictionary:
 			"max_health": 100.0,
 			"stamina": 100.0,
 			"max_stamina": 100.0,
-			"souls": 0
+			"money": 250
 		},
 		"inventory": [],
 		"equipment": {},
@@ -203,13 +203,11 @@ func _sync_live_player_snapshot() -> void:
 	var snapshot = player.capture_state()
 	if snapshot.has("position"):
 		current_save_data["player_position"] = snapshot["position"]
-	if snapshot.has("health"):
-		var stats = current_save_data.get("player_stats", {})
-		stats["health"] = snapshot["health"]
-		stats["max_health"] = snapshot.get("max_health", stats.get("max_health", 100.0))
-		stats["stamina"] = snapshot.get("stamina", stats.get("stamina", 100.0))
-		stats["max_stamina"] = snapshot.get("max_stamina", stats.get("max_stamina", 100.0))
-		current_save_data["player_stats"] = stats
+	var stats = current_save_data.get("player_stats", {})
+	stats["health"] = snapshot.get("health", stats.get("health", 100.0))
+	stats["max_health"] = snapshot.get("max_health", stats.get("max_health", 100.0))
+	stats["money"] = snapshot.get("money", stats.get("money", 250))
+	current_save_data["player_stats"] = stats
 
 
 func _capture_registered_saveables() -> void:
