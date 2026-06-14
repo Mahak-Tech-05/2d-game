@@ -1,10 +1,12 @@
 extends Node2D
 
+# Open-world city scene: player, HUD, drivable cars, stores, NPC contacts, and interaction placeholders.
 # Open-world city scene: player, HUD, traffic props, stores, NPC contacts, and interaction placeholders.
 
 const _PLAYER_SCENE = preload("res://Scenes/Player/Player.tscn")
 const _HUD_SCENE = preload("res://Scenes/UI/GameHUD.tscn")
 const _INTERACTABLE_SCRIPT = preload("res://Scripts/World/CityInteractable.gd")
+const _VEHICLE_SCRIPT = preload("res://Scripts/World/Vehicle.gd")
 
 func _ready() -> void:
 	_spawn_player()
@@ -30,6 +32,8 @@ func _spawn_hud() -> void:
 	add_child(hud)
 
 func _spawn_city_interactions() -> void:
+	_add_vehicle(Vector2(155, 650), "Blista Compact", GamePalette.VEHICLE_RED, 0.0)
+	_add_vehicle(Vector2(1020, 650), "Prairie Cruiser", GamePalette.VEHICLE_BLUE, PI)
 	_add_vehicle(Vector2(155, 650), "Blista Compact", GamePalette.VEHICLE_RED)
 	_add_vehicle(Vector2(1020, 650), "Prairie Cruiser", GamePalette.VEHICLE_BLUE)
 	_add_shop(Vector2(180, 260), "Vespucci 24/7")
@@ -37,6 +41,28 @@ func _spawn_city_interactions() -> void:
 	_add_npc(Vector2(925, 352), "Lamar", "Mission contact: delivery route placeholder unlocked.", 50)
 	_add_npc(Vector2(1288, 610), "Maya", "Street race placeholder added to your phone.", 35)
 
+func _add_vehicle(pos: Vector2, title: String, color: Color, angle: float) -> void:
+	var car = KinematicBody2D.new()
+	car.name = title.replace(" ", "")
+	car.set_script(_VEHICLE_SCRIPT)
+	car.vehicle_name = title
+	car.global_position = pos
+	car.rotation = angle
+	$Entities.add_child(car)
+
+	var shape = CollisionShape2D.new()
+	var box = RectangleShape2D.new()
+	box.extents = Vector2(34, 18)
+	shape.shape = box
+	car.add_child(shape)
+
+	var body = Polygon2D.new()
+	body.color = color
+	body.polygon = PoolVector2Array([Vector2(-34, -16), Vector2(28, -16), Vector2(38, 0), Vector2(28, 18), Vector2(-30, 18), Vector2(-40, 0)])
+	car.add_child(body)
+	_add_child_rect(car, Rect2(-16, -12, 30, 11), GamePalette.VEHICLE_GLASS)
+	_add_child_rect(car, Rect2(-25, 15, 12, 5), Color(0.05, 0.05, 0.05))
+	_add_child_rect(car, Rect2(12, 15, 12, 5), Color(0.05, 0.05, 0.05))
 func _add_vehicle(pos: Vector2, title: String, color: Color) -> void:
 	var root = _make_interactable(pos, "vehicle", title, "Press E to enter")
 	var car = Polygon2D.new()

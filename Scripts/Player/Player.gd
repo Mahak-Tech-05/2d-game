@@ -14,6 +14,9 @@ var velocity: Vector2 = Vector2.ZERO
 var money: int = 250
 var in_vehicle := false
 var vehicle_name := "On Foot"
+var current_vehicle = null
+var _saved_collision_layer := 0
+var _saved_collision_mask := 0
 var _visual: Node2D
 var _body_rect: CanvasItem
 var _weapon_pivot: Node2D
@@ -51,6 +54,12 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	if GameManager.current_state != GameState.State.PLAYING:
 		return
+	if in_vehicle:
+		_update_attached_vehicle_state()
+		_handle_actions()
+		return
+	var input_vector = _get_input_velocity()
+	var desired_velocity = input_vector * walk_speed
 	var input_vector = _get_input_velocity()
 	var target_speed = drive_speed if in_vehicle else walk_speed
 	var desired_velocity = input_vector * target_speed
@@ -155,6 +164,7 @@ func _handle_actions() -> void:
 			_try_interact()
 
 func _try_interact() -> void:
+	var nearest = _find_nearest_interactable()
 	var nearest = null
 	var best_dist := 72.0
 	for item in get_tree().get_nodes_in_group("city_interactable"):
@@ -169,6 +179,70 @@ func _try_interact() -> void:
 	GameEvents.raise_mission_text_changed(str(result.get("title", "City")) + ": " + str(result.get("message", "")))
 	if result.has("money_delta"):
 		add_money(int(result["money_delta"]))
+	if str(result.get("type", "")) == "vehicle" and result.has("vehicle"):
+		_enter_vehicle(result["vehicle"])
+
+func _find_nearest_interactable():
+	var nearest = null
+	var best_dist := 78.0
+	for vehicle in get_tree().get_nodes_in_group("vehicles"):
+		if vehicle.has_method("has_driver") and vehicle.has_driver():
+			continue
+		var vehicle_dist = global_position.distance_to(vehicle.global_position)
+		if vehicle_dist < best_dist:
+			best_dist = vehicle_dist
+			nearest = vehicle
+	for item in get_tree().get_nodes_in_group("city_interactable"):
+		if item.is_in_group("vehicles"):
+			continue
+		var dist = global_position.distance_to(item.global_position)
+		if dist < best_dist:
+			best_dist = dist
+			nearest = item
+	return nearest
+
+func _enter_vehicle(vehicle) -> void:
+	if vehicle == null or vehicle.has_driver():
+		return
+	current_vehicle = vehicle
+	in_vehicle = true
+	vehicle_name = vehicle.vehicle_name
+	velocity = Vector2.ZERO
+	_saved_collision_layer = collision_layer
+	_saved_collision_mask = collision_mask
+	collision_layer = 0
+	collision_mask = 0
+	if _visual != null:
+		_visual.visible = false
+	vehicle.enter(self)
+	_update_attached_vehicle_state()
+	GameEvents.raise_vehicle_status_changed("Driving")
+	GameEvents.raise_mission_text_changed("Driving %s. WASD accelerates, reverses, and steers. Press E to exit." % vehicle_name)
+
+func _exit_vehicle() -> void:
+	if current_vehicle == null:
+		return
+	var exit_pos = current_vehicle.get_exit_position()
+	current_vehicle.exit()
+	global_position = exit_pos
+	in_vehicle = false
+	vehicle_name = "On Foot"
+	current_vehicle = null
+	collision_layer = _saved_collision_layer if _saved_collision_layer != 0 else GameConstants.LAYER_PLAYER
+	collision_mask = _saved_collision_mask if _saved_collision_mask != 0 else GameConstants.LAYER_WORLD
+	if _visual != null:
+		_visual.visible = true
+		_visual.scale = Vector2.ONE
+	GameEvents.raise_vehicle_status_changed("On Foot")
+	GameEvents.raise_mission_text_changed("Exited vehicle. Walk to another car, store, or citizen and press E.")
+
+func _update_attached_vehicle_state() -> void:
+	if current_vehicle == null or not is_instance_valid(current_vehicle):
+		in_vehicle = false
+		GameEvents.raise_vehicle_status_changed("On Foot")
+		return
+	global_position = current_vehicle.global_position
+	facing = Vector2.RIGHT.rotated(current_vehicle.rotation)
 	if str(result.get("type", "")) == "vehicle":
 		_enter_vehicle(str(result.get("title", "Vehicle")))
 
