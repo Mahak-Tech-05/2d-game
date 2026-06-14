@@ -1,0 +1,12 @@
+{
+  "title": "THE LAST YODHA",
+  "genre": "2D Dark Fantasy Roguelike + Card Battle RPG",
+  "pillars": [
+    "tense turn-based card combat",
+    "procedural tower ascension",
+    "dark fantasy progression and relic synergies",
+    "Unity-ready modular C# architecture"
+  ],
+  "acts": ["The Ashen Gate", "The Hollow Shrine", "The Crown of Night"],
+  "bosses": ["Crimson Warden", "Moonless Oracle", "The Last King"]
+}
