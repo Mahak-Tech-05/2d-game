@@ -14,11 +14,11 @@ func _ready() -> void:
 func _refresh_continue_button() -> void:
 	var has_save = SaveManager.has_save(0)
 	$CenterContainer/MenuPanel/ContinueButton.disabled = not has_save
-	$CenterContainer/MenuPanel/TitleLabel.text = "The Last Yodha"
+	$CenterContainer/MenuPanel/TitleLabel.text = "Sun City Open World"
 	if has_save:
-		$CenterContainer/MenuPanel/VersionLabel.text = "Welcome back, warrior — continue your journey"
+		$CenterContainer/MenuPanel/VersionLabel.text = "Welcome back — continue your city run"
 	else:
-		$CenterContainer/MenuPanel/VersionLabel.text = "Press New Game to begin your journey"
+		$CenterContainer/MenuPanel/VersionLabel.text = "Press New Game to hit the streets"
 
 
 func _on_new_game_pressed() -> void:

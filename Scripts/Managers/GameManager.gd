@@ -28,7 +28,7 @@ func initialize() -> void:
 	SceneManager.initialize()
 	transition_to(GameState.State.MAIN_MENU)
 	is_initialized = true
-	print("[GameManager] Initialized — The Last Yodha (Godot 3 / low-spec)")
+	print("[GameManager] Initialized — Sun City Open World (Godot 3 / low-spec)")
 
 
 func shutdown() -> void:
